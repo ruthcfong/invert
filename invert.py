@@ -15,7 +15,6 @@ import matplotlib.pyplot as plt
 from PIL import Image
 
 def alpha_prior(x, alpha=2.):
-    #return torch.sum(torch.pow(torch.abs(x),alpha))
     return torch.abs(x.view(-1)**alpha).sum()
 
 
