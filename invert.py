@@ -21,8 +21,10 @@ def alpha_prior(x, alpha=2.):
 def tv_norm(x, beta=2.):
     assert(x.size(0) == 1)
     img = x[0]
-    dy = -img[:,:-1,:] + img[:,1:,:]
-    dx = -img[:,:,:-1] + img[:,:,1:]
+    dy = img - img # set size of derivative and set border = 0
+    dx = img - img
+    dy[:,1:,:] = -img[:,:-1,:] + img[:,1:,:]
+    dx[:,:,1:] = -img[:,:,:-1] + img[:,:,1:]
     return ((dx.pow(2) + dy.pow(2)).pow(beta/2.)).sum()
 
 
@@ -96,6 +98,7 @@ def invert(image, network='alexnet', size=227, layer='features.4', alpha=6, beta
         model.cuda()
 
     img_ = transform(Image.open(image)).unsqueeze(0)
+    print img_.size()
 
     activations = []
 
@@ -114,6 +117,7 @@ def invert(image, network='alexnet', size=227, layer='features.4', alpha=6, beta
 
     x_ = Variable((1e-3 * torch.randn(*img_.size()).cuda() if cuda else 
         1e-3 * torch.randn(*img_.size())), requires_grad=True)
+
 
     alpha_f = lambda x: alpha_prior(x, alpha=alpha)
     tv_f = lambda x: tv_norm(x, beta=beta)
